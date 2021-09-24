@@ -6,8 +6,8 @@
 #define ON  1
 #define OFF 0
 
-int init_bcm(int pin);
+int init_bcm();
 
-void write_gpio(int pin, int status);
+int write_gpio(int pin, int status);
 
 #endif
