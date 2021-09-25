@@ -10,6 +10,7 @@
 #include "error.h"
 #include "dht22.h"
 #include "people_counter.h"
+#include "json_parser.h"
 
 void handle_interuption(int signal);
 int main(int argc, char* argv[]);

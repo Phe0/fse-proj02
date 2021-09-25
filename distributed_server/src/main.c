@@ -15,6 +15,10 @@ void handle_interuption(int signal) {
 }
 
 int main(int argc, char* argv[]) {
+
+    read_file(argv[1]);
+    parse_json();
+    /*
     int pin_in = atoi(argv[1]);
     int pin_out = atoi(argv[2]);
 
@@ -42,6 +46,6 @@ int main(int argc, char* argv[]) {
     pthread_join(thread_in, NULL);
     pthread_join(thread_out, NULL);
     pthread_join(thread_dht, NULL);
-
+    */
     return 0;
 }
