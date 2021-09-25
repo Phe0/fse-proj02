@@ -4,7 +4,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include "gpio.h"
+#include "error.h"
+#include "dht22.h"
+
+void handle_interuption(int signal);
+int main(int argc, char* argv[]);
 
 #endif
