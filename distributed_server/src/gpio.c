@@ -38,9 +38,6 @@ int outputs[] = {4, 17, 27, 7, 16, 22, 25, 8, 12, 18, 24, 5, 6};
 int open_events[28];
 int event_counter = 0;
 
-int people_in = 0;
-int people_out = 0;
-
 int convert_pin(int gpio_pin) {
     return pin_map[gpio_pin];
 }
@@ -121,34 +118,4 @@ void close_all_events() {
     for (int i = 0; i < event_counter; i++) {
         close_event(open_events[i]);
     }
-}
-
-void* check_people_in(void* arg) {
-    int pin = *((int *)arg);
-
-    while(1) {
-        bcm2835_gpio_set_eds(convert_pin(pin));
-        sleep(0.2);
-
-        if (bcm2835_gpio_eds(convert_pin(pin))) {
-            people_in++;
-        }
-    }
-}
-
-void* check_people_out(void* arg) {
-    int pin = *((int *)arg);
-
-    while(1) {
-        bcm2835_gpio_set_eds(convert_pin(pin));
-        sleep(0.2);
-
-        if (bcm2835_gpio_eds(convert_pin(pin))) {
-            people_out++;
-        }
-    }
-}
-
-int get_current_people_in() {
-    return people_in - people_out;
 }
