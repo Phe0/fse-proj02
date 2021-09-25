@@ -21,40 +21,134 @@ int pin_map[] = {
     RPI_V2_GPIO_P1_11, // 17
     RPI_V2_GPIO_P1_12, // 18
     RPI_V2_GPIO_P1_35, // 19
-    -1,
-    -1,
-    RPI_V2_GPIO_P1_15, // 20
-    RPI_V2_GPIO_P1_16, // 21
-    RPI_V2_GPIO_P1_18, // 22
-    RPI_V2_GPIO_P1_22, // 23
-    RPI_V2_GPIO_P1_37, // 24
-    RPI_V2_GPIO_P1_13  // 25
+    RPI_V2_GPIO_P1_38, // 20
+    RPI_V2_GPIO_P1_40, // 21
+    RPI_V2_GPIO_P1_15, // 22
+    RPI_V2_GPIO_P1_16, // 23
+    RPI_V2_GPIO_P1_18, // 24
+    RPI_V2_GPIO_P1_22, // 25
+    RPI_V2_GPIO_P1_37, // 26
+    RPI_V2_GPIO_P1_13  // 27
 };
 
 int inputs[] = {26, 23, 9, 11, 10, 13, 19};
 
 int outputs[] = {4, 17, 27, 7, 16, 22, 25, 8, 12, 18, 24, 5, 6};
 
+int open_events[28];
+int event_counter = 0;
+
+int people_in = 0;
+int people_out = 0;
+
+int convert_pin(int gpio_pin) {
+    return pin_map[gpio_pin];
+}
+
+void set_max_priority() {
+    struct sched_param sched;
+    memset(&sched, 0, sizeof(sched));
+
+    sched.sched_priority = sched_get_priority_max(SCHED_FIFO);
+    sched_setscheduler(0, SCHED_FIFO, &sched);
+}
+
+void set_default_priority() {
+    struct sched_param sched;
+    memset(&sched, 0, sizeof(sched));
+
+    sched.sched_priority = 0;
+    sched_setscheduler(0, SCHED_OTHER, &sched);
+}
+
+void set_as_input(int gpio_pin) {
+    bcm2835_gpio_fsel(convert_pin(gpio_pin), BCM2835_GPIO_FSEL_INPT);
+}
+
+void set_as_output(int gpio_pin) {
+    bcm2835_gpio_fsel(convert_pin(gpio_pin), BCM2835_GPIO_FSEL_OUTP);
+}
+
 int init_bcm() {
+
+    set_max_priority();
+
+    mlockall(MCL_CURRENT | MCL_FUTURE);
+
     if(!bcm2835_init())
         return 0;
 
     for (int i = 0; i < sizeof(inputs)/sizeof(inputs[0]); i++) {
-        bcm2835_gpio_fsel(pin_map[inputs[i]], BCM2835_GPIO_FSEL_INPT);
+        set_as_input(inputs[i]);
     }
 
     for (int i = 0; i < sizeof(outputs)/sizeof(outputs[0]); i++) {
-        bcm2835_gpio_fsel(pin_map[outputs[i]], BCM2835_GPIO_FSEL_OUTP);
+        set_as_output(outputs[i]);
     }
 
     return 1;
 }
 
-int write_gpio(int pin, int status) {
-    bcm2835_gpio_write(pin_map[pin], status);
+void close_bcm() {
+    bcm2835_close();
+}
 
-    int current_level = bcm2835_gpio_lev(pin_map[pin]);
+int write_gpio(int pin, int status) {
+    bcm2835_gpio_write(convert_pin(pin), status);
+
+    int current_level = bcm2835_gpio_lev(convert_pin(pin));
     if (status == current_level)
         return 1;
     return 0;
+}
+
+int read_gpio(int pin) {
+    int result = bcm2835_gpio_lev(convert_pin(pin));
+    return result;
+}
+
+void listen_event(int pin) {
+    bcm2835_gpio_ren(convert_pin(pin));
+    open_events[event_counter] = pin;
+    event_counter++;
+}
+
+void close_event(int pin) {
+    bcm2835_gpio_clr_ren(convert_pin(pin));
+}
+
+void close_all_events() {
+    for (int i = 0; i < event_counter; i++) {
+        close_event(open_events[i]);
+    }
+}
+
+void* check_people_in(void* arg) {
+    int pin = *((int *)arg);
+
+    while(1) {
+        bcm2835_gpio_set_eds(convert_pin(pin));
+        sleep(0.2);
+
+        if (bcm2835_gpio_eds(convert_pin(pin))) {
+            people_in++;
+        }
+    }
+}
+
+void* check_people_out(void* arg) {
+    int pin = *((int *)arg);
+
+    while(1) {
+        bcm2835_gpio_set_eds(convert_pin(pin));
+        sleep(0.2);
+
+        if (bcm2835_gpio_eds(convert_pin(pin))) {
+            people_out++;
+        }
+    }
+}
+
+int get_current_people_in() {
+    return people_in - people_out;
 }
