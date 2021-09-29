@@ -12,59 +12,37 @@ float get_humidity() {
 }
 
 int read_dht_data() {
-    int pulseCounts[DHT_PULSES*2] = {0};
+    int data[5] = { 0, 0, 0, 0, 0 };
+    int counter = 0;
+    int laststate = HIGH;
+    int j = 0;
 
     set_as_output(DHT_PIN);
-    write_gpio(DHT_PIN, HIGH);
-    usleep(500000);
 
     write_gpio(DHT_PIN, LOW);
-    usleep(20000);
+    delay(18);
 
     set_as_input(DHT_PIN);
 
-    while(read_gpio(DHT_PIN)) {
+    while(read_gpio(DHT_PIN) == HIGH) {
         usleep(1);
     }
 
-    uint32_t count = 0;
-    while (read_gpio(DHT_PIN)) {
-        if (++count >= DHT_MAXCOUNT) {
-            set_default_priority();
-            return -1;
+    for (int i = 0; i < MAXTIMINGS; i++) {
+        counter = 0;
+        while(read_gpio(DHT_PIN) == laststate) {
+            counter++;
+            if(counter == 1000)
+                break;
         }
-    }
+        laststate = read_gpio(DHT_PIN);
+        if (counter == 1000) break;
 
-    for (int i=0; i < DHT_PULSES*2; i+=2) {
-        while(!read_gpio(DHT_PIN)) {
-            if (++pulseCounts[i] >= DHT_MAXCOUNT) {
-                set_default_priority();
-                return -1;
-            }
-        }
-
-        while(read_gpio(DHT_PIN)) {
-            if (++pulseCounts[i+1] >= DHT_MAXCOUNT) {
-                set_default_priority();
-                return -1;
-            }
-        }
-    }
-
-    set_default_priority();
-
-    uint32_t threshold = 0;
-    for (int i=2; i < DHT_PULSES*2; i+=2) {
-        threshold += pulseCounts[i];
-    }
-    threshold /= DHT_PULSES-1;
-
-    uint32_t data[5] = {0};
-    for (int i=3; i < DHT_PULSES*2; i+=2) {
-        int index = (i-3) / 16;
-        data[index] <<= 1;
-        if (pulseCounts[i] >= threshold) {
-            data[index] |= 1;
+        if (i>3 && i%2 == 0) {
+            data[j/8] <<= 1;
+            if (counter > 200)
+                data[j/8] |= 1;
+            j++;
         }
     }
 

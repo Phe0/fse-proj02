@@ -7,6 +7,7 @@
 #define DHT_PULSES   41
 
 #define DHT_PIN      20
+#define MAXTIMINGS   100
 
 float get_temperature();
 float get_humidity();
