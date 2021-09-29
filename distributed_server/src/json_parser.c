@@ -3,17 +3,6 @@
 long file_size;
 char* buffer;
 
-unsigned int outputs_length;
-unsigned int inputs_length;
-
-unsigned int get_outputs_length() {
-    return output_length;
-}
-
-unsigned int get_inputs_length() {
-    return inputs_length;
-}
-
 void read_file(char* filepath) {
     FILE* file = fopen(filepath, "r");
 
@@ -79,7 +68,6 @@ struct device* get_device_array(cJSON* json, char* attribute, unsigned int* size
     return device_array;
 }
 
-
 struct configuration parse_json() {
     struct configuration config;
     cJSON *json = cJSON_ParseWithLength(buffer, file_size);
@@ -97,8 +85,8 @@ struct configuration parse_json() {
     config.porta = get_int(json, "porta");
     config.nome = get_string(json, "nome");
 
-    config.outputs = get_device_array(json, "outputs", &outputs_length);
-    config.inputs = get_device_array(json, "inputs", &inputs_length);
+    config.outputs = get_device_array(json, "outputs", &config.outputs_length);
+    config.inputs = get_device_array(json, "inputs", &config.inputs_length);
 
     cJSON_Delete(json);
 

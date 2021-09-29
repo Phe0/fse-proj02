@@ -17,12 +17,12 @@ struct configuration {
     char* ip;
     int porta;
     char* nome;
+    unsigned int outputs_length;
     struct device* outputs;
+    unsigned int inputs_length;
     struct device* inputs;
 };
 
-unsigned int get_outputs_length();
-unsigned int get_inputs_length();
 void read_file(char* filepath);
 char* get_string(cJSON *json, char* attribute);
 int get_int(cJSON *json, char* attribute);
