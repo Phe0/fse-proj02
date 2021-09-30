@@ -1,0 +1,49 @@
+{
+    "ip": "192.168.0.53",
+    "porta": 10223,
+    "nome": "1º Andar",
+    "outputs": [
+        {
+          "type": "lampada",
+          "tag": "Lâmpada da Sala 101",
+          "gpio": 22
+        },
+        {
+            "type": "lampada",
+            "tag": "Lâmpada da Sala 102",
+            "gpio": 25
+        },
+        {
+          "type": "lampada",
+          "tag": "Lâmpadas do Corredor",
+          "gpio": 8
+        },
+        {
+            "type": "ar-condicionado",
+            "tag": "Ar-Condicionado (1º Andar)",
+            "gpio": 12
+        }
+    ],
+    "inputs": [
+        {
+          "type": "presenca",
+          "tag": "Sensor de Presença",
+          "gpio": 18
+        },
+        {
+            "type": "fumaca",
+            "tag": "Sensor de Fumaça",
+            "gpio": 24
+        },
+        {
+          "type": "janela",
+          "tag": "Sensor de Janela 101",
+          "gpio": 5
+        },
+        {
+            "type": "janela",
+            "tag": "Sensor de Janela 102",
+            "gpio": 6
+        }
+    ]
+}

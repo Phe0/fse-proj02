@@ -21,6 +21,6 @@ int receive_order();
 void* order_handler();
 int init_server(int port);
 void close_sockets();
-void server(int port);
+void* server(void* arg);
 
 #endif

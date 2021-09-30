@@ -6,7 +6,6 @@ int has_person_in_counter;
 int has_person_out_counter;
 
 void handle_interuption(int signal) {
-    /*
     close_all_events();
     if (has_person_in_counter) {
         pthread_cancel(thread_in);
@@ -18,10 +17,9 @@ void handle_interuption(int signal) {
     }
     pthread_cancel(thread_dht);
     pthread_join(thread_dht, NULL);
+
     pthread_cancel(thread_server);
     pthread_join(thread_server, NULL);
-
-    */
     close_bcm();
     close_sockets();
     exit(0);
@@ -46,15 +44,9 @@ int main(int argc, char* argv[]) {
     set_outputs(config.outputs, config.outputs_length);
     set_inputs(config.inputs, config.inputs_length);
 
-    server(config.porta);
-
-    close_sockets();
-    close_bcm();
-/*
-
-
     has_person_in_counter = check_input(PERSON_IN_PIN);
     has_person_out_counter = check_input(PERSON_OUT_PIN);
+
 
     if (has_person_in_counter) {
         int pin_in = PERSON_IN_PIN;
@@ -67,10 +59,10 @@ int main(int argc, char* argv[]) {
         listen_event(PERSON_OUT_PIN);
         pthread_create(&thread_out, NULL, &check_people_out, (void *)&pin_out);
     }
+    
+    pthread_create(&thread_server, NULL, &server, (void*)&config.porta);
+
     pthread_create(&thread_dht, NULL, &set_dht_values, NULL);
-
-
-    while(1);
 
     while(1) {
         printf("Temperatura: %.1f\n", get_temperature());
@@ -80,9 +72,13 @@ int main(int argc, char* argv[]) {
         //enviar temperatura, umidade e pessoas via tcp aqui
         sleep(1);
     }
+
     pthread_join(thread_in, NULL);
     pthread_join(thread_out, NULL);
     pthread_join(thread_dht, NULL);
-*/
+
+    close_sockets();
+    close_bcm();
+
     return 0;
 }
