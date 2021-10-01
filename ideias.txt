@@ -1,0 +1,25 @@
+SERVIDOR CENTRAL
+
+    Server
+        - não precisa de infos do distribuído
+        - recebe info de temperatura, umidade e quantidade de pessoas de 1 em 1 segundo
+        - envia número da gpio para receber estado atual dela
+        - recebe arquivo de configuração do servidor distribuído ao de conectar
+        - recebe eventos dos sensores de presença, fumaça, janela e porta
+
+    Cliente
+        - deve ser ligado apenas depois do server conectar
+        - envia mensagens para ligar outputs
+
+SERVIDOR DISTRIBUÍDO
+
+    Server
+        - nao precisa de info do Cliente
+        - recebe mensagem para ligar outputs, os liga e retorna se houve sucesso ou não
+
+    Cliente
+        - ip e porta do servidor central serão hardcoded
+        - ao estabelecer conexão envia o arquivo de configuração do servidor distribuído
+        - envia temperatura, umidade e quantidade de pessoas a cada 1 segundo
+        - retorna estad atual da gpio caso receba mensagem
+        - envia mensagem caso sensor de presença, fumaça, janela ou porta for acionado

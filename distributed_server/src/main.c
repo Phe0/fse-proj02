@@ -22,6 +22,7 @@ void handle_interuption(int signal) {
     pthread_join(thread_server, NULL);
     close_bcm();
     close_sockets();
+    close_json();
     exit(0);
 }
 
@@ -59,26 +60,38 @@ int main(int argc, char* argv[]) {
         listen_event(PERSON_OUT_PIN);
         pthread_create(&thread_out, NULL, &check_people_out, (void *)&pin_out);
     }
-    
-    pthread_create(&thread_server, NULL, &server, (void*)&config.porta);
-
     pthread_create(&thread_dht, NULL, &set_dht_values, NULL);
+    
+    // pthread_create(&thread_server, NULL, &server, (void*)&config.porta);
 
-    while(1) {
+    init_client(config.ip, 10023);
+
+    FILE* fp = fopen(argv[1], "r");
+    if (fp == NULL) {
+        error("Erro reading config file");
+    }
+
+    send_file(fp);
+
+    //while(1) {
+        /*
         printf("Temperatura: %.1f\n", get_temperature());
         printf("Umidade: %.1f\n", get_humidity());
         printf("Pessoas: %d\n", get_current_people_in());
         
         //enviar temperatura, umidade e pessoas via tcp aqui
         sleep(1);
-    }
+        */
+    //}
 
     pthread_join(thread_in, NULL);
     pthread_join(thread_out, NULL);
     pthread_join(thread_dht, NULL);
+    // pthread_join(thread_server, NULL);
 
     close_sockets();
     close_bcm();
+    close_json();
 
     return 0;
 }

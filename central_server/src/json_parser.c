@@ -1,21 +1,23 @@
 #include "json_parser.h"
 
-long file_size;
-char* buffer;
-cJSON* config_json;
+void print_config(struct configuration config) {
+    printf("IP %s\n", config.ip);
+    printf("Porta %d\n", config.porta);
+    printf("Nome %s\n", config.nome);
+    printf("OUTPUTS\n");
 
-void read_file(char* filepath) {
-    FILE* file = fopen(filepath, "r");
+    for (int i = 0; i < config.outputs_length; i++) {
+        printf("Type %s\n", config.outputs[i].type);
+        printf("Tag %s\n", config.outputs[i].tag);
+        printf("GPIO %d\n\n", config.outputs[i].gpio);
+    }
 
-    fseek(file, 0, SEEK_END);
-    file_size = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    buffer = malloc(file_size + 1);
-    fread(buffer, 1, file_size, file);
-    fclose(file);
-
-    buffer[file_size] = 0;
+    for (int i = 0; i < config.inputs_length; i++) {
+        printf("Type %s\n", config.inputs[i].type);
+        printf("Tag %s\n", config.inputs[i].tag);
+        printf("GPIO %d\n\n", config.inputs[i].gpio);
+    }
+    printf("---------------------------\n");
 }
 
 char* get_string(cJSON *json, char* attribute) {
@@ -69,9 +71,19 @@ struct device* get_device_array(cJSON* json, char* attribute, unsigned int* size
     return device_array;
 }
 
-struct configuration parse_json() {
+struct configuration parse_json(FILE* file) {
+    fseek(file, 0, SEEK_END);
+    int file_size = ftell(file);
+    fseek(file, 0, SEEK_END);
+
+    char* buffer = malloc(file_size + 1);
+    fread(buffer, 1, file_size, file);
+    fclose(file);
+
+    buffer[file_size] = 0;
+
     struct configuration config;
-    config_json = cJSON_ParseWithLength(buffer, file_size);
+    cJSON* config_json = cJSON_ParseWithLength(buffer, file_size);
 
     if (config_json == NULL) {
         const char* error_ptr = cJSON_GetErrorPtr();
@@ -90,8 +102,4 @@ struct configuration parse_json() {
     config.inputs = get_device_array(config_json, "inputs", &config.inputs_length);
 
     return config;
-}
-
-void close_json() {
-    cJSON_Delete(config_json);
 }

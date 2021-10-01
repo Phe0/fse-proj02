@@ -43,14 +43,7 @@ void* server(void* arg) {
     }
 }
 
-void handle_interruption(int signal) {
-    printf("signal %d\n", signal);
-    exit(0);
-}
-
 int init_server(int port) {
-
-    signal(SIGPIPE, handle_interruption);
     
     server_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
