@@ -27,6 +27,23 @@ void handle_interuption(int signal) {
 }
 
 int main(int argc, char* argv[]) {
+
+    // ler arquivo de config
+    // iniciar servidor (responsável por receber ordens)
+    // esperar conexão no servidor
+
+    //inicia cliente
+
+    if (argc < 2) {
+        perror("Arquivo de configuração deve ser fornecido");
+        exit(1);
+    }
+    read_file(argv[1]);
+    struct configuration config = parse_json();
+
+    init_server(config.)
+
+    /*
     if (argc < 2) {
         perror("Arquivo de configuração deve ser fornecido");
         exit(1);
@@ -73,25 +90,24 @@ int main(int argc, char* argv[]) {
 
     send_file(fp);
 
-    //while(1) {
-        /*
+    while(1) {
         printf("Temperatura: %.1f\n", get_temperature());
         printf("Umidade: %.1f\n", get_humidity());
         printf("Pessoas: %d\n", get_current_people_in());
         
         //enviar temperatura, umidade e pessoas via tcp aqui
         sleep(1);
-        */
-    //}
+    }
 
     pthread_join(thread_in, NULL);
     pthread_join(thread_out, NULL);
     pthread_join(thread_dht, NULL);
-    // pthread_join(thread_server, NULL);
+    pthread_join(thread_server, NULL);
 
     close_sockets();
     close_bcm();
     close_json();
+    */
 
     return 0;
 }

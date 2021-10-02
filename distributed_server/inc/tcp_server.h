@@ -18,7 +18,7 @@ struct order {
 };
 
 int receive_order();
-void* order_handler();
+void order_handler();
 int init_server(int port);
 void close_sockets();
 void* server(void* arg);

@@ -15,7 +15,8 @@ struct device {
 
 struct configuration {
     char* ip;
-    int porta;
+    int porta_central;
+    int porta_distribuida;
     char* nome;
     unsigned int outputs_length;
     struct device* outputs;

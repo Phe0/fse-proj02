@@ -83,7 +83,8 @@ struct configuration parse_json() {
     }
 
     config.ip = get_string(config_json, "ip");
-    config.porta = get_int(config_json, "porta");
+    config.porta_central = get_int(config_json, "porta_central");
+    config.porta_distribuida = get_int(config_json, "porta_distribuida");
     config.nome = get_string(config_json, "nome");
 
     config.outputs = get_device_array(config_json, "outputs", &config.outputs_length);

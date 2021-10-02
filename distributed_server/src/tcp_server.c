@@ -24,7 +24,7 @@ void* order_handler() {
     }
 }
 
-void* server(void* arg) {
+void server(void* arg) {
     int port = *((int *)arg);
     printf("Tentando conectar com a porta %d\n", port);
     int is_running = init_server(port);

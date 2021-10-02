@@ -1,6 +1,7 @@
 {
     "ip": "192.168.0.53",
-    "porta": 10123,
+    "porta_central": 10023,
+    "porta_distribuida": 10123,
     "nome": "Térreo",
     "outputs": [
         {
