@@ -15,8 +15,15 @@
 
 #define SIZE 256
 
+struct content {
+    int type;
+    float value;
+};
+
 void send_file(FILE* fp);
 void init_client(char* server_ip, int port);
 void close_client();
+void send_float(int type, float value);
+void send_int(int type, int value);
 
 #endif

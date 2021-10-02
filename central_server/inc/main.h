@@ -4,7 +4,6 @@
 #include <pthread.h>
 #include <signal.h>
 
-#include "tcp_client.h"
 #include "tcp_server.h"
 
 void handle_interuption();

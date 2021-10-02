@@ -11,7 +11,6 @@
 #include "dht22.h"
 #include "people_counter.h"
 #include "json_parser.h"
-#include "tcp_server.h"
 #include "tcp_client.h"
 
 void handle_interuption(int signal);

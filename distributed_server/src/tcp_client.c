@@ -8,7 +8,6 @@ void send_file(FILE* fp) {
 
     while((n = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
         send(client_socket, buffer, n, 0);
-        printf("%s", buffer);
         memset((char *)&buffer, 0, sizeof(buffer));
     }
 
@@ -18,6 +17,16 @@ void send_file(FILE* fp) {
     end[2] = 0;
 
     send(client_socket, end, 3, 0);
+}
+
+void send_float(int type, float value) {
+    send(client_socket, &type, sizeof(type), 0);
+    send(client_socket, &value, sizeof(value), 0);
+}
+
+void send_int(int type, int value) {
+    send(client_socket, &type, sizeof(type), 0);
+    send(client_socket, &value, sizeof(value), 0);
 }
 
 void init_client(char* server_ip, int port) {

@@ -2,7 +2,6 @@
 
 void print_config(struct configuration config) {
     printf("IP %s\n", config.ip);
-    printf("Porta %d\n", config.porta);
     printf("Nome %s\n", config.nome);
     printf("OUTPUTS\n");
 

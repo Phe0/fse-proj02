@@ -18,22 +18,13 @@ void handle_interuption(int signal) {
     pthread_cancel(thread_dht);
     pthread_join(thread_dht, NULL);
 
-    pthread_cancel(thread_server);
-    pthread_join(thread_server, NULL);
     close_bcm();
-    close_sockets();
+    close_client();
     close_json();
     exit(0);
 }
 
 int main(int argc, char* argv[]) {
-
-    // ler arquivo de config
-    // iniciar servidor (responsável por receber ordens)
-    // esperar conexão no servidor
-
-    //inicia cliente
-
     if (argc < 2) {
         perror("Arquivo de configuração deve ser fornecido");
         exit(1);
@@ -41,18 +32,16 @@ int main(int argc, char* argv[]) {
     read_file(argv[1]);
     struct configuration config = parse_json();
 
-    init_server(config.)
+    init_client(config.ip, config.porta_central);
 
-    /*
-    if (argc < 2) {
-        perror("Arquivo de configuração deve ser fornecido");
-        exit(1);
+    FILE* fp = fopen(argv[1], "r");
+    if (fp == NULL) {
+        error("Erro reading config file");
     }
 
-    signal(SIGINT, handle_interuption);
+    send_file(fp);
 
-    read_file(argv[1]);
-    struct configuration config = parse_json();
+    fclose(fp);
 
     if (!init_bcm()) {
         perror("Error initing bcm2835");
@@ -64,7 +53,6 @@ int main(int argc, char* argv[]) {
 
     has_person_in_counter = check_input(PERSON_IN_PIN);
     has_person_out_counter = check_input(PERSON_OUT_PIN);
-
 
     if (has_person_in_counter) {
         int pin_in = PERSON_IN_PIN;
@@ -78,36 +66,33 @@ int main(int argc, char* argv[]) {
         pthread_create(&thread_out, NULL, &check_people_out, (void *)&pin_out);
     }
     pthread_create(&thread_dht, NULL, &set_dht_values, NULL);
-    
-    // pthread_create(&thread_server, NULL, &server, (void*)&config.porta);
-
-    init_client(config.ip, 10023);
-
-    FILE* fp = fopen(argv[1], "r");
-    if (fp == NULL) {
-        error("Erro reading config file");
-    }
-
-    send_file(fp);
 
     while(1) {
-        printf("Temperatura: %.1f\n", get_temperature());
-        printf("Umidade: %.1f\n", get_humidity());
-        printf("Pessoas: %d\n", get_current_people_in());
+        float temp = get_temperature();
+        float humidity = get_humidity();
+        int current_people = get_current_people_in();
+        printf("Temperatura: %.1f\n", temp);
+        printf("Umidade: %.1f\n", humidity);
+        printf("Pessoas: %d\n", current_people);
+
+        send_float(1, temp);
+        send_float(2, humidity);
+        send_int(3, current_people);
         
         //enviar temperatura, umidade e pessoas via tcp aqui
         sleep(1);
     }
 
+    close_all_events();
+
     pthread_join(thread_in, NULL);
     pthread_join(thread_out, NULL);
     pthread_join(thread_dht, NULL);
-    pthread_join(thread_server, NULL);
 
-    close_sockets();
     close_bcm();
     close_json();
-    */
+
+    close_client();
 
     return 0;
 }

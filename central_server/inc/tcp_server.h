@@ -10,16 +10,25 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <pthread.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "error.h"
 #include "json_parser.h"
 
 #define SIZE 256
+#define MAX_CONNECTIONS 100
 
 struct connection {
-    int is_valid;
     int socket;
+    struct sockaddr_in address;
     struct configuration config;
+};
+
+struct content {
+    int type;
+    float value;
 };
 
 struct connection* get_conn_list();
@@ -28,8 +37,8 @@ FILE* receive_file(int socket);
 int receive_order();
 void* order_handler();
 int init_server(int port);
-void close_sockets();
-void* server(void* arg);
+void close_all_sockets();
+void server(void* arg);
 void close_all_clients();
 
 #endif
