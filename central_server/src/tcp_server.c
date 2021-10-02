@@ -19,7 +19,7 @@ FILE* receive_file(int socket) {
     char buffer[SIZE] = {};
     int n;
 
-    fp = fopen(filename, "rw+");
+    fp = fopen(filename, "w+");
     int should_exit = 0;
     while((n = recv(socket, buffer, sizeof(buffer), 0)) > 0 || !should_exit) {
         if (buffer[n-3] == '#' && buffer[n-2] == '@') {
@@ -29,7 +29,6 @@ FILE* receive_file(int socket) {
         fputs(buffer, fp);
         memset((char *)&buffer, 0, sizeof(buffer));
     }
-    // fclose(fp);
     return fp;
 }
 
@@ -44,11 +43,9 @@ void* server(void* arg) {
         int client_socket = accept(server_socket, (struct sockaddr*)&cliaddr, &cli_len);
         if (client_socket >= 0) {
             printf("Conexão estabelecida\n");
-            FILE* fp receive_file(client_socket);
-            printf("1\n");
+            FILE* fp = receive_file(client_socket);
             struct configuration config = parse_json(fp); 
             struct connection conn;
-            printf("2\n");
             conn.is_valid = 1;
             conn.socket = client_socket;
             conn.config = config;

@@ -24,7 +24,7 @@ struct connection {
 
 struct connection* get_conn_list();
 int get_conn_list_size();
-void receive_file();
+FILE* receive_file(int socket);
 int receive_order();
 void* order_handler();
 int init_server(int port);

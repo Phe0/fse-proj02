@@ -74,7 +74,7 @@ struct device* get_device_array(cJSON* json, char* attribute, unsigned int* size
 struct configuration parse_json(FILE* file) {
     fseek(file, 0, SEEK_END);
     int file_size = ftell(file);
-    fseek(file, 0, SEEK_END);
+    fseek(file, 0, SEEK_SET);
 
     char* buffer = malloc(file_size + 1);
     fread(buffer, 1, file_size, file);
