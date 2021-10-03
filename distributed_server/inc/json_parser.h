@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "cJSON.h"
 #include "error.h"
@@ -30,5 +31,6 @@ int get_int(cJSON *json, char* attribute);
 struct device* get_device_array(cJSON* json, char* attribute, unsigned int* size);
 struct configuration parse_json();
 void close_json();
+int* find_type(struct device* devices, int devices_length, char* type, int* ammount);
 
 #endif

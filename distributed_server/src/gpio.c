@@ -5,30 +5,30 @@ int pin_map[] = {
     -1,
     -1,
     -1,
-    RPI_V2_GPIO_P1_07, // 4
-    RPI_V2_GPIO_P1_29, // 5
-    RPI_V2_GPIO_P1_31, // 6
-    RPI_V2_GPIO_P1_26, // 7
-    RPI_V2_GPIO_P1_24, // 8
-    RPI_V2_GPIO_P1_21, // 9
-    RPI_V2_GPIO_P1_19, // 10
-    RPI_V2_GPIO_P1_23, // 11
-    RPI_V2_GPIO_P1_32, // 12
-    RPI_V2_GPIO_P1_33, // 13
+    7, // 4
+    21, // 5
+    22, // 6
+    11, // 7
+    10, // 8
+    13, // 9
+    12, // 10
+    14, // 11
+    26, // 12
+    23, // 13
     -1,
     -1,
-    RPI_V2_GPIO_P1_36, // 16
-    RPI_V2_GPIO_P1_11, // 17
-    RPI_V2_GPIO_P1_12, // 18
-    RPI_V2_GPIO_P1_35, // 19
-    RPI_V2_GPIO_P1_38, // 20
-    RPI_V2_GPIO_P1_40, // 21
-    RPI_V2_GPIO_P1_15, // 22
-    RPI_V2_GPIO_P1_16, // 23
-    RPI_V2_GPIO_P1_18, // 24
-    RPI_V2_GPIO_P1_22, // 25
-    RPI_V2_GPIO_P1_37, // 26
-    RPI_V2_GPIO_P1_13  // 27
+    27, // 16
+    11, // 17
+    1, // 18
+    24, // 19
+    28, // 20
+    29, // 21
+    3, // 22
+    4, // 23
+    5, // 24
+    2, // 25
+    25, // 26
+    2  // 27
 };
 
 int* inputs;
@@ -40,20 +40,54 @@ int outputs_length;
 int open_events[28];
 int event_counter = 0;
 
-void set_outputs(struct device* outputs_array, int outputs_ammount) {
-    outputs = malloc(outputs_ammount * sizeof(int));
-    outputs_length = outputs_ammount;
-    for (int i = 0; i < outputs_ammount; i++) {
-        outputs[i] = outputs_array[i].gpio;
+struct timeval last_change;
+
+void handle_presence() {
+    struct timeval now;
+    unsigned long diff;
+    gettimeofday(&now, NULL);
+    diff = (now.tv_sec * 1000000 + now.tv_usec) - (last_change.tv_sec * 1000000 + last_change.tv_usec);
+
+    if (diff > IGNORE_CHANGE_BELOW_USEC) {
+        printf("alarme de presenca\n");
     }
+    last_change = now;
 }
 
-void set_inputs(struct device* inputs_array, int inputs_ammount) {
-    inputs = malloc(inputs_ammount * sizeof(int));
-    inputs_length = inputs_ammount;
-    for (int i = 0; i < inputs_ammount; i++) {
-        inputs[i] = inputs_array[i].gpio;
+void handle_smoke() {
+    struct timeval now;
+    unsigned long diff;
+    gettimeofday(&now, NULL);
+    diff = (now.tv_sec * 1000000 + now.tv_usec) - (last_change.tv_sec * 1000000 + last_change.tv_usec);
+
+    if (diff > IGNORE_CHANGE_BELOW_USEC) {
+        printf("alarme de fumaca\n");
     }
+    last_change = now;
+}
+
+void handle_person_in() {
+    struct timeval now;
+    unsigned long diff;
+    gettimeofday(&now, NULL);
+    diff = (now.tv_sec * 1000000 + now.tv_usec) - (last_change.tv_sec * 1000000 + last_change.tv_usec);
+
+    if (diff > IGNORE_CHANGE_BELOW_USEC) {
+        printf("pessoa entrou\n");
+    }
+    last_change = now;
+}
+
+void handle_person_out() {
+    struct timeval now;
+    unsigned long diff;
+    gettimeofday(&now, NULL);
+    diff = (now.tv_sec * 1000000 + now.tv_usec) - (last_change.tv_sec * 1000000 + last_change.tv_usec);
+
+    if (diff > IGNORE_CHANGE_BELOW_USEC) {
+        printf("pessoa saiu\n");
+    }
+    last_change = now;
 }
 
 int convert_pin(int gpio_pin) {
@@ -68,44 +102,49 @@ void set_max_priority() {
     sched_setscheduler(0, SCHED_FIFO, &sched);
 }
 
-void set_default_priority() {
-    struct sched_param sched;
-    memset(&sched, 0, sizeof(sched));
-
-    sched.sched_priority = 0;
-    sched_setscheduler(0, SCHED_OTHER, &sched);
-}
-
-void set_as_input(int gpio_pin) {
-    bcm2835_gpio_fsel(convert_pin(gpio_pin), BCM2835_GPIO_FSEL_INPT);
+void set_as_input(int gpio_pin, char* type) {
+    pinMode(convert_pin(gpio_pin), INPUT);
+    if (strlen(type)) {
+        if (strcmp(type, "presenca") == 0 || strcmp(type, "janela") == 0 || strcmp(type, "porta") == 0) {
+            wiringPiISR(convert_pin(gpio_pin), INT_EDGE_RISING, &handle_presence);
+        }
+        if (strcmp(type, "fumaca") == 0) {
+            wiringPiISR(convert_pin(gpio_pin), INT_EDGE_RISING, &handle_smoke);
+        }
+        if (strcmp(type, "contagem") == 0) {
+            if (gpio_pin == PERSON_IN_PIN) {
+                wiringPiISR(convert_pin(gpio_pin), INT_EDGE_RISING, &handle_person_in);
+            }
+            if (gpio_pin == PERSON_OUT_PIN) {
+                wiringPiISR(convert_pin(gpio_pin), INT_EDGE_RISING, &handle_person_out);
+            }
+        }
+    }
 }
 
 void set_as_output(int gpio_pin) {
-    bcm2835_gpio_fsel(convert_pin(gpio_pin), BCM2835_GPIO_FSEL_OUTP);
+    pinMode(convert_pin(gpio_pin), OUTPUT);
 }
 
-int init_bcm() {
+int init_gpio(struct configuration config) {
 
     set_max_priority();
 
     mlockall(MCL_CURRENT | MCL_FUTURE);
 
-    if(!bcm2835_init())
-        return 0;
+    wiringPiSetup();
 
-    for (int i = 0; i < inputs_length; i++) {
-        set_as_input(inputs[i]);
+    gettimeofday(&last_change, NULL);
+
+    for (int i = 0; i < config.inputs_length; i++) {
+        set_as_input(config.inputs[i].gpio, config.inputs[i].type);
     }
 
-    for (int i = 0; i < outputs_length; i++) {
-        set_as_output(outputs[i]);
+    for (int i = 0; i < config.outputs_length; i++) {
+        set_as_output(config.outputs[i].gpio);
     }
 
     return 1;
-}
-
-void close_bcm() {
-    bcm2835_close();
 }
 
 int write_gpio(int pin, int status) {
@@ -121,31 +160,17 @@ int write_gpio(int pin, int status) {
     if (!isListed)
         return -1;
 
-    bcm2835_gpio_write(convert_pin(pin), status);
+    digitalWrite(convert_pin(pin), status);
 
-    int current_level = bcm2835_gpio_lev(convert_pin(pin));
+    int current_level = digitalRead(convert_pin(pin));
     if (status == current_level)
         return 1;
     return 0;
 }
 
-int invert_gpio(int pin) {
-    int current_status = read_gpio(pin);
-    if (current_status == HIGH)
-        return write_gpio(pin, LOW);
-    else
-        return write_gpio(pin, HIGH);
-}
-
 int read_gpio(int pin) {
-    int result = bcm2835_gpio_lev(convert_pin(pin));
+    int result = digitalRead(convert_pin(pin));
     return result;
-}
-
-void listen_event(int pin) {
-    bcm2835_gpio_ren(convert_pin(pin));
-    open_events[event_counter] = pin;
-    event_counter++;
 }
 
 int check_input(int pin) {
@@ -162,14 +187,4 @@ int check_output(int pin) {
             return 1;
     }
     return 0;
-}
-
-void close_event(int pin) {
-    bcm2835_gpio_clr_ren(convert_pin(pin));
-}
-
-void close_all_events() {
-    for (int i = 0; i < event_counter; i++) {
-        close_event(open_events[i]);
-    }
 }

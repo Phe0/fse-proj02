@@ -28,6 +28,24 @@ char* get_string(cJSON *json, char* attribute) {
     return "";
 }
 
+int* find_type(struct device* devices, int devices_length, char* type, int* ammount) {
+    int* found = malloc(devices_length * sizeof(int));
+    int counter = 0;
+    for (int i = 0; i < devices_length; i++) {
+        if (strcmp(devices[i].type, type) == 0) {
+            found[counter] = i;
+            counter++;
+        }
+    }
+    int* found_indexes = malloc(counter * sizeof(int));
+    *ammount = counter;
+    for (int i = 0; i < counter; i++) {
+        found_indexes[i] = found[i];
+    }
+    free(found);
+    return found_indexes;
+}
+
 int get_int(cJSON *json, char* attribute) {
     cJSON* content = NULL;
     content = cJSON_GetObjectItemCaseSensitive(json, attribute);

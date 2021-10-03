@@ -22,7 +22,7 @@ int read_dht_data() {
     write_gpio(DHT_PIN, LOW);
     delay(18);
 
-    set_as_input(DHT_PIN);
+    set_as_input(DHT_PIN, "");
 
     while(read_gpio(DHT_PIN) == HIGH) {
         usleep(1);

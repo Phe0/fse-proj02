@@ -9,7 +9,6 @@
 #include "gpio.h"
 #include "error.h"
 #include "dht22.h"
-#include "people_counter.h"
 #include "json_parser.h"
 #include "tcp_client.h"
 
