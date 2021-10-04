@@ -7,11 +7,11 @@
 #include <signal.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <string.h>
 #include <sys/time.h>
 
 #include "json_parser.h"
+#include "tcp_client.h"
 
 #define ON  1
 #define OFF 0
@@ -34,5 +34,6 @@ int write_gpio(int pin, int status);
 int read_gpio(int pin);
 int check_input(int pin);
 int check_output(int pin);
+int invert_gpio(int pin);
 
 #endif

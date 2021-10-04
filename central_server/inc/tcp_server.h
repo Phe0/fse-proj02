@@ -38,7 +38,10 @@ int receive_order();
 void* order_handler();
 int init_server(int port);
 void close_all_sockets();
-void server(void* arg);
+void* server(void* arg);
 void close_all_clients();
+void get_output_states(struct configuration config, int socket);
+int request_state(int gpio, int socket);
+void make_order(int gpio);
 
 #endif

@@ -68,15 +68,31 @@ void* listen_dist_server(struct connection* conn) {
         if (type == 1) {
             float value;
             n = recv(conn->socket, &value, sizeof(value), 0);
-            printf("Temperatura: %f\n", value);
+            //printf("Temperatura: %f\n", value);
         } else if (type == 2) {
             float value;
             n = recv(conn->socket, &value, sizeof(value), 0);
-            printf("Umidade: %f\n", value);
+            //printf("Umidade: %f\n", value);
         } else if (type == 3) {
             int value;
             n = recv(conn->socket, &value, sizeof(value), 0);
-            printf("Pessoas: %d\n", value);
+            //printf("Alarme de presenca\n");
+        } else if (type == 4) {
+            int value;
+            n = recv(conn->socket, &value, sizeof(value), 0);
+            //printf("Alarme de fumaça\n");
+        } else if (type == 5) {
+            int value;
+            n = recv(conn->socket, &value, sizeof(value), 0);
+            //printf("Pessoa entrou\n");
+        } else if (type == 6) {
+            int value;
+            n = recv(conn->socket, &value, sizeof(value), 0);
+            //printf("Pessoa saiu\n");
+        } else if (type == 7) {
+            int value;
+            n = recv(conn->socket, &value, sizeof(value), 0);
+            printf("Resultado %d\n", value);
         }
         if (n == 0) {
             int index;
@@ -93,7 +109,45 @@ void* listen_dist_server(struct connection* conn) {
     }
 }
 
-void server(void* arg) {
+void get_output_states(struct configuration config, int socket) {
+    for (int i = 0; i < config.outputs_length; i++) {
+        config.outputs[i].state = request_state(config.outputs[i].gpio, socket);
+    }
+}
+
+int request_state(int gpio, int socket) {
+    int request = 1;
+    send(socket, &request, sizeof(request), 0);
+    send(socket, &gpio, sizeof(gpio), 0);
+    int state;
+    recv(socket, &state, sizeof(state), 0);
+    return state;
+}
+
+int find_connection_by_output(int gpio) {
+    for (int i = 0; i < conn_list_size; i++) {
+        for (int j = 0; i < conn_list[i].config.outputs_length; j++) {
+            if (conn_list[i].config.outputs[j].gpio == gpio) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+void make_order(int gpio) {
+    int conn_index = find_connection_by_output(gpio);
+    if (!conn_index) {
+        printf("Erro gpio\n");
+        return;
+    }
+
+    int request = 2;
+    send(conn_list[conn_index].socket, &request, sizeof(request), 0);
+    send(conn_list[conn_index].socket, &gpio, sizeof(gpio), 0);
+}
+
+void* server(void* arg) {
     int port = *((int*)arg);
     printf("Tentando abrir server na porta %d\n", port);
     check(init_server(port), "Server could not be opened");
@@ -110,6 +164,8 @@ void server(void* arg) {
         FILE* fp = receive_file(client_socket);
         struct configuration config = parse_json(fp); 
         struct connection conn;
+
+        get_output_states(config, client_socket);
         print_config(config);
         conn.address = cliaddr;
         conn.socket = client_socket;

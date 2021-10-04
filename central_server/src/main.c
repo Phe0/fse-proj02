@@ -18,7 +18,21 @@ int main(int argc, char* argv[]) {
 
     int server_port = 10023;
 
-    server((void*)&server_port);
+    pthread_create(&thread_server, NULL, &server, (void*)&server_port);
+
+    while(1) {
+        int gpio;
+        scanf("%d", &gpio);
+
+        if (gpio < 0) {
+            close_all_sockets();
+            pthread_cancel(thread_server);
+            pthread_join(thread_server, NULL);
+            exit(0);
+        }
+
+        make_order(gpio);
+    }
 
     return 0;
 }

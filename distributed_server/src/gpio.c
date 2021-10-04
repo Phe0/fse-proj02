@@ -31,14 +31,10 @@ int pin_map[] = {
     2  // 27
 };
 
-int* inputs;
-int inputs_length;
-
-int* outputs;
-int outputs_length;
-
 int open_events[28];
 int event_counter = 0;
+
+struct configuration server_config;
 
 struct timeval last_change;
 
@@ -49,7 +45,7 @@ void handle_presence() {
     diff = (now.tv_sec * 1000000 + now.tv_usec) - (last_change.tv_sec * 1000000 + last_change.tv_usec);
 
     if (diff > IGNORE_CHANGE_BELOW_USEC) {
-        printf("alarme de presenca\n");
+        send_event(3);
     }
     last_change = now;
 }
@@ -61,7 +57,7 @@ void handle_smoke() {
     diff = (now.tv_sec * 1000000 + now.tv_usec) - (last_change.tv_sec * 1000000 + last_change.tv_usec);
 
     if (diff > IGNORE_CHANGE_BELOW_USEC) {
-        printf("alarme de fumaca\n");
+        send_event(4);
     }
     last_change = now;
 }
@@ -73,7 +69,7 @@ void handle_person_in() {
     diff = (now.tv_sec * 1000000 + now.tv_usec) - (last_change.tv_sec * 1000000 + last_change.tv_usec);
 
     if (diff > IGNORE_CHANGE_BELOW_USEC) {
-        printf("pessoa entrou\n");
+        send_event(5);
     }
     last_change = now;
 }
@@ -85,7 +81,7 @@ void handle_person_out() {
     diff = (now.tv_sec * 1000000 + now.tv_usec) - (last_change.tv_sec * 1000000 + last_change.tv_usec);
 
     if (diff > IGNORE_CHANGE_BELOW_USEC) {
-        printf("pessoa saiu\n");
+        send_event(6);
     }
     last_change = now;
 }
@@ -128,9 +124,7 @@ void set_as_output(int gpio_pin) {
 
 int init_gpio(struct configuration config) {
 
-    set_max_priority();
-
-    mlockall(MCL_CURRENT | MCL_FUTURE);
+    server_config = config;
 
     wiringPiSetup();
 
@@ -147,11 +141,16 @@ int init_gpio(struct configuration config) {
     return 1;
 }
 
+int invert_gpio(int pin) {
+    int state = read_gpio(pin);
+    return write_gpio(pin, !state);
+}
+
 int write_gpio(int pin, int status) {
 
     int isListed = 0;
-    for(int i = 0; i < outputs_length; i++) {
-        if (outputs[i] == pin) {
+    for(int i = 0; i < server_config.outputs_length; i++) {
+        if (server_config.outputs[i].gpio == pin) {
             isListed = 1;
             break;
         }
@@ -174,16 +173,16 @@ int read_gpio(int pin) {
 }
 
 int check_input(int pin) {
-    for (int i = 0; i < inputs_length; i++) {
-        if (inputs[i] == pin)
+    for (int i = 0; i < server_config.inputs_length; i++) {
+        if (server_config.inputs[i].gpio == pin)
             return 1;
     }
     return 0;
 }
 
 int check_output(int pin) {
-    for (int i = 0; i < outputs_length; i++) {
-        if (outputs[i] == pin)
+    for (int i = 0; i < server_config.outputs_length; i++) {
+        if (server_config.outputs[i].gpio == pin)
             return 1;
     }
     return 0;

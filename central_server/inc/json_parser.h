@@ -11,6 +11,7 @@ struct device {
     char* type;
     char* tag;
     int gpio;
+    int state;
 };
 
 struct configuration {

@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 
 #include "error.h"
+#include "gpio.h"
 
 #define SIZE 256
 
@@ -25,5 +26,7 @@ void init_client(char* server_ip, int port);
 void close_client();
 void send_float(int type, float value);
 void send_int(int type, int value);
+void send_event(int type);
+void* receive_orders();
 
 #endif

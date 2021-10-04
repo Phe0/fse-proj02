@@ -8,7 +8,8 @@ void print_config(struct configuration config) {
     for (int i = 0; i < config.outputs_length; i++) {
         printf("Type %s\n", config.outputs[i].type);
         printf("Tag %s\n", config.outputs[i].tag);
-        printf("GPIO %d\n\n", config.outputs[i].gpio);
+        printf("GPIO %d\n", config.outputs[i].gpio);
+        printf("State %d\n\n", config.outputs[i].state);
     }
 
     for (int i = 0; i < config.inputs_length; i++) {
