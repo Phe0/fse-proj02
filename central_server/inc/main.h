@@ -5,6 +5,7 @@
 #include <signal.h>
 
 #include "tcp_server.h"
+#include "alarm.h"
 
 void handle_interuption();
 int main(int argc, char* argv[]);

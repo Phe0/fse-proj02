@@ -76,10 +76,20 @@ void* listen_dist_server(struct connection* conn) {
         } else if (type == 3) {
             int value;
             n = recv(conn->socket, &value, sizeof(value), 0);
+            if (get_presece_alarm()) {
+                printf("Acionar alarme de presenca");
+            }
             //printf("Alarme de presenca\n");
         } else if (type == 4) {
             int value;
             n = recv(conn->socket, &value, sizeof(value), 0);
+            if (get_smoke()) {
+                printf("Acionar alarme de fumaça");
+                int aspersor = find_aspersor();
+                if (aspersor) {
+                    make_order(aspersor);
+                }
+            }
             //printf("Alarme de fumaça\n");
         } else if (type == 5) {
             int value;
@@ -89,10 +99,6 @@ void* listen_dist_server(struct connection* conn) {
             int value;
             n = recv(conn->socket, &value, sizeof(value), 0);
             //printf("Pessoa saiu\n");
-        } else if (type == 7) {
-            int value;
-            n = recv(conn->socket, &value, sizeof(value), 0);
-            printf("Resultado %d\n", value);
         }
         if (n == 0) {
             int index;
@@ -109,10 +115,15 @@ void* listen_dist_server(struct connection* conn) {
     }
 }
 
-void get_output_states(struct configuration config, int socket) {
-    for (int i = 0; i < config.outputs_length; i++) {
-        config.outputs[i].state = request_state(config.outputs[i].gpio, socket);
+int find_aspersor() {
+    for (int i = 0; i < conn_list_size; i++) {
+        for (int j = 0; j < conn_list[i].config.outputs_length; j++) {
+            if (strcmp(conn_list[i].config.outputs[j].type, "aspersor") == 0) {
+                return conn_list[i].config.outputs[j].gpio;
+            }
+        }
     }
+    return 0;
 }
 
 int request_state(int gpio, int socket) {
@@ -135,9 +146,17 @@ int find_connection_by_output(int gpio) {
     return -1;
 }
 
+int find_output_by_gpio(struct configuration config, int gpio) {
+    for (int i = 0; i < config.outputs_length; i++) {
+        if (config.outputs[i].gpio == gpio)
+            return i;
+    }
+    return -1;
+}
+
 void make_order(int gpio) {
     int conn_index = find_connection_by_output(gpio);
-    if (!conn_index) {
+    if (conn_index < 0) {
         printf("Erro gpio\n");
         return;
     }
@@ -145,6 +164,10 @@ void make_order(int gpio) {
     int request = 2;
     send(conn_list[conn_index].socket, &request, sizeof(request), 0);
     send(conn_list[conn_index].socket, &gpio, sizeof(gpio), 0);
+    int type, value;
+    recv(conn_list[conn_index].socket, &type, sizeof(type), 0);
+    recv(conn_list[conn_index].socket, &value, sizeof(value), 0);
+    printf("Resultado %d\n", value);
 }
 
 void* server(void* arg) {
@@ -165,8 +188,6 @@ void* server(void* arg) {
         struct configuration config = parse_json(fp); 
         struct connection conn;
 
-        get_output_states(config, client_socket);
-        print_config(config);
         conn.address = cliaddr;
         conn.socket = client_socket;
         conn.config = config;

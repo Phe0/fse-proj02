@@ -16,6 +16,7 @@
 
 #include "error.h"
 #include "json_parser.h"
+#include "alarm.h"
 
 #define SIZE 256
 #define MAX_CONNECTIONS 100

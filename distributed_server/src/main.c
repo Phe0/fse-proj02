@@ -43,6 +43,7 @@ int main(int argc, char* argv[]) {
         float temp = get_temperature();
         float humidity = get_humidity();
 
+        printf("Enviando temperatura e umidade\n");
         send_float(1, temp);
         send_float(2, humidity);
         

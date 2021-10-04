@@ -45,6 +45,7 @@ void handle_presence() {
     diff = (now.tv_sec * 1000000 + now.tv_usec) - (last_change.tv_sec * 1000000 + last_change.tv_usec);
 
     if (diff > IGNORE_CHANGE_BELOW_USEC) {
+        printf("Enviando detecção de presença\n");
         send_event(3);
     }
     last_change = now;
@@ -57,6 +58,7 @@ void handle_smoke() {
     diff = (now.tv_sec * 1000000 + now.tv_usec) - (last_change.tv_sec * 1000000 + last_change.tv_usec);
 
     if (diff > IGNORE_CHANGE_BELOW_USEC) {
+        printf("Enviando detecção de fumaça\n");
         send_event(4);
     }
     last_change = now;
@@ -69,6 +71,7 @@ void handle_person_in() {
     diff = (now.tv_sec * 1000000 + now.tv_usec) - (last_change.tv_sec * 1000000 + last_change.tv_usec);
 
     if (diff > IGNORE_CHANGE_BELOW_USEC) {
+        printf("Enviando entrada de pessoa\n");
         send_event(5);
     }
     last_change = now;
@@ -81,6 +84,7 @@ void handle_person_out() {
     diff = (now.tv_sec * 1000000 + now.tv_usec) - (last_change.tv_sec * 1000000 + last_change.tv_usec);
 
     if (diff > IGNORE_CHANGE_BELOW_USEC) {
+        printf("Enviando saída de pessoa\n");
         send_event(6);
     }
     last_change = now;

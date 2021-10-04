@@ -52,24 +52,21 @@ void init_client(char* server_ip, int port) {
 }
 
 void* receive_orders() {
-    printf("iniciando\n");
     while(1) {
         int type;
+        int n;
         recv(client_socket, &type, sizeof(type), 0);
-        printf("type %d\n", type);
         if (type == 1) {
             int gpio;
             recv(client_socket, &gpio, sizeof(gpio), 0);
-            printf("gpio %d\n", gpio);
+            printf("Enviando estado da gpio %d\n", gpio);
             int state = read_gpio(gpio);
-            printf("state %d\n", state);
             send(client_socket, &state, sizeof(state), 0);
         } else if (type == 2) {
             int gpio;
             recv(client_socket, &gpio, sizeof(gpio), 0);
-            printf("gpio %d\n", gpio);
+            printf("Invertendo estado da gpio %d\n", gpio);
             int result = invert_gpio(gpio);
-            printf("result %d\n", result);
             int id = 7;
             send(client_socket, &id, sizeof(id), 0);
             send(client_socket, &result, sizeof(result), 0);
