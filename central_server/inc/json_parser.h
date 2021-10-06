@@ -25,7 +25,6 @@ struct configuration {
     struct device* inputs;
 };
 
-void print_config(struct configuration config);
 void read_file(char* filepath);
 char* get_string(cJSON *json, char* attribute);
 int get_int(cJSON *json, char* attribute);

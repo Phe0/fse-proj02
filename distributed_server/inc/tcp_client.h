@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 
 #include "error.h"
 #include "gpio.h"
@@ -28,5 +29,7 @@ void send_float(int type, float value);
 void send_int(int type, int value);
 void send_event(int type);
 void* receive_orders();
+void init_client_thread();
+void close_client_thread();
 
 #endif

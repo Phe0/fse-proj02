@@ -7,9 +7,8 @@ int has_person_out_counter;
 
 
 void handle_interuption(int signal) {
-    pthread_cancel(thread_client);
-    pthread_join(thread_client, NULL);
     close_client();
+    close_client_thread();
     close_json();
     exit(0);
 }
@@ -36,7 +35,7 @@ int main(int argc, char* argv[]) {
     send_file(fp);
     fclose(fp);
 
-    pthread_create(&thread_client, NULL, &receive_orders, NULL);
+    init_client_thread();
 
     while(1) {
         read_dht_data();
@@ -50,12 +49,9 @@ int main(int argc, char* argv[]) {
         sleep(1);
     }
 
-    pthread_cancel(thread_client);
-    pthread_join(thread_client, NULL);
-
-    close_json();
-
     close_client();
+    close_client_thread();
+    close_json();
 
     return 0;
 }

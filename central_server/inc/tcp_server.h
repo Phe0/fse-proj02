@@ -17,6 +17,8 @@
 #include "error.h"
 #include "json_parser.h"
 #include "alarm.h"
+#include "menu.h"
+#include "logger.h"
 
 #define SIZE 256
 #define MAX_CONNECTIONS 100
@@ -44,5 +46,8 @@ void close_all_clients();
 void get_output_states(struct configuration config, int socket);
 int request_state(int gpio, int socket);
 void make_order(int gpio);
+int find_aspersor();
+void turn_all_devices_by_type(char* type, int desired_state);
+int check_type(char* type);
 
 #endif

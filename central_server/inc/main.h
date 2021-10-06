@@ -6,6 +6,8 @@
 
 #include "tcp_server.h"
 #include "alarm.h"
+#include "menu.h"
+#include "logger.h"
 
 void handle_interuption();
 int main(int argc, char* argv[]);

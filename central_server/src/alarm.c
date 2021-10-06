@@ -20,3 +20,7 @@ int invert_smoke_alarm() {
     smoke_alarm = !smoke_alarm;
     return smoke_alarm;
 }
+
+void play_alarm() {
+    system("omxplayer alarm.mp3");
+}

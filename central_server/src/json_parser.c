@@ -1,24 +1,5 @@
 #include "json_parser.h"
 
-void print_config(struct configuration config) {
-    printf("IP %s\n", config.ip);
-    printf("Nome %s\n", config.nome);
-    printf("OUTPUTS\n");
-
-    for (int i = 0; i < config.outputs_length; i++) {
-        printf("Type %s\n", config.outputs[i].type);
-        printf("Tag %s\n", config.outputs[i].tag);
-        printf("GPIO %d\n", config.outputs[i].gpio);
-    }
-
-    for (int i = 0; i < config.inputs_length; i++) {
-        printf("Type %s\n", config.inputs[i].type);
-        printf("Tag %s\n", config.inputs[i].tag);
-        printf("GPIO %d\n\n", config.inputs[i].gpio);
-    }
-    printf("---------------------------\n");
-}
-
 char* get_string(cJSON *json, char* attribute) {
     cJSON* content = NULL;
     content = cJSON_GetObjectItemCaseSensitive(json, attribute);
