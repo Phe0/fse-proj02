@@ -156,13 +156,14 @@ void menu() {
                     *(option_names + counter) = conn_list[i].config.outputs[j].tag;
                     option_gpios[counter] = conn_list[i].config.outputs[j].gpio;
 
+                    option_states[counter] = request_state(conn_list[i].config.outputs[j].gpio, conn_list[i].socket);
+                    /*
                     if (conn_list[i].config.outputs[j].state >= 0) 
                         option_states[counter] = conn_list[i].config.outputs[j].state;
                     else {
-                        option_states[counter] = request_state(conn_list[i].config.outputs[j].gpio, conn_list[i].socket);
                         conn_list[i].config.outputs[j].state = option_states[counter];
                     }
-
+                    */
                     char* result = malloc(9 + strlen(conn_list[i].config.outputs[j].tag));
 
                     if (option_states[counter])
@@ -194,7 +195,7 @@ void menu() {
             final_options[ammount_options + extra_options_size] = "Voltar";
             extra_options_size++;
 
-            wclear(menuwin);
+            werase(menuwin);
 
             set_box(menuwin, "Menu");
 
@@ -214,6 +215,8 @@ void menu() {
                 make_order(option_gpios[input]);
             }
 
+            wclear(menuwin);
+
             free(final_options);
             free(option_names);
             free(option_gpios);
@@ -221,9 +224,11 @@ void menu() {
         }
         else if (input == 1) {
             invert_presece_alarm();
+            wclear(menuwin);
         }
         else if (input == 2) {
             invert_smoke_alarm();
+            wclear(menuwin);
         }
     }
 }
